@@ -311,15 +311,13 @@ http://127.0.0.1:5000
 
 ---
 
-## 📸 Screenshots
+## 📸 Project Screenshot
 
-Add project screenshots here:
+### Homepage
 
-```text
-screenshots/homepage.png
-screenshots/prediction-result.png
-screenshots/dashboard.png
-```
+![Employee Burnout Prediction Dashboard](screenshots/homepage.png)
+
+The interactive dashboard allows users to enter employee information and receive real-time burnout predictions with visual risk indicators.
 
 ---
 
