@@ -245,9 +245,9 @@ body {
     stroke-linecap: round;
 }
 
-.track-low { stroke: #2ecc71; opacity: 0.85; }
+/* .track-low { stroke: #2ecc71; opacity: 0.85; }
 .track-medium { stroke: #f39c12; opacity: 0.85; }
-.track-high { stroke: #e74c3c; opacity: 0.85; }
+.track-high { stroke: #e74c3c; opacity: 0.85; } */
 
 .needle-group {
     transform-origin: 100px 100px;
@@ -415,4 +415,19 @@ body {
         width: 100%;
         max-width: 220px;
     }
+}
+
+
+.feature-impact-card {
+    width: 100%;
+    margin-top:20px;
+    padding:15px;
+    border:1px solid #ddd;
+    border-radius:10px;
+}
+
+.impact-row{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 0;
 }
