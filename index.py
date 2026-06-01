@@ -7,7 +7,7 @@ app = Flask(__name__)
 try:
     train_burnout_model()
 except Exception as e:
-    print(f"Error training model on initialization: {e}")
+    raise Exception(f"Model training failed: {e}")
 
 @app.route('/')
 def index():
