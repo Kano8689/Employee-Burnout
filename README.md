@@ -341,6 +341,7 @@ Through this project, I gained hands-on experience in:
 **Krishnam Mavani**
 
 * GitHub: https://github.com/kano8689
+* Live Link: https://employee-burnout-two.vercel.app/
 
 ---
 
