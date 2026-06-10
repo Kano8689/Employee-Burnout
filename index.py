@@ -19,15 +19,18 @@ predictor = BurnoutPredictor()
 
 
 def ensure_ready():
-    if not validate_csv(CSV_PATH):
-        print("[INFO] Generating dataset...")
-        generate_dataset()
-    if not os.path.exists(PKL_PATH):
-        print("[INFO] Training model...")
+    global predictor
+    if os.path.exists(PKL_PATH):
+        if predictor.load():
+            print("[OK] Pre-trained model loaded.")
+            return
+    print("[INFO] Model files not found. Training...")
+    try:
+        if not validate_csv(CSV_PATH):
+            generate_dataset()
         predictor.train(CSV_PATH)
-    else:
-        if not predictor.load():
-            predictor.train(CSV_PATH)
+    except Exception as e:
+        print(f"[WARN] Could not train: {e}")
 
 
 FEATURE_DISPLAY = {
@@ -221,7 +224,5 @@ def download_sample():
 
 if __name__ == '__main__':
     ensure_ready()
-    print("\n" + "=" * 50)
-    print("  Burnout Predictor: http://localhost:5000")
-    print("=" * 50 + "\n")
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
