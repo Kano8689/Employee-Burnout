@@ -12,31 +12,29 @@ from generate_dataset import generate_dataset
 
 app = Flask(__name__)
 app.secret_key = 'burnout-secret-2024'
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+
+IS_VERCEL = os.environ.get('VERCEL') == '1'
+UPLOAD_FOLDER = '/tmp/uploads' if IS_VERCEL else os.path.join(
+os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 predictor = BurnoutPredictor()
 
 
 def ensure_ready():
-    """
-    Train the model in-memory on startup.
-    Works on Vercel (read-only FS) because we never need to write/load .pkl.
-    The dataset CSV is committed to the repo.
-    """
+    """Train model lazily on first request (Vercel-safe)."""
     global predictor
+    if predictor.model is not None:
+        return  # already trained
     try:
-        # Make sure dataset exists (it's committed, but generate as fallback)
         if not validate_csv(CSV_PATH):
             generate_dataset()
-
-        # Train fresh in memory — no pickle loading, no version mismatch
         predictor.train_in_memory(CSV_PATH)
-        print("[OK] Model trained in memory and ready.")
+        print("[OK] Model ready.")
     except Exception as e:
         import traceback
         traceback.print_exc()
-        print(f"[ERR] ensure_ready failed: {e}")
+        print(f"[ERR] {e}")
 
 
 FEATURE_DISPLAY = {
@@ -67,6 +65,7 @@ def fmt_contributions(contribs):
 # ─── Main page (single prediction, matches your UI) ───
 @app.route('/', methods=['GET', 'POST'])
 def predict_single():
+    ensure_ready()
     result = None
     if request.method == 'POST':
         try:
@@ -98,6 +97,7 @@ def predict_single():
 # ─── CSV batch prediction ───
 @app.route('/predict/csv', methods=['GET', 'POST'])
 def predict_csv():
+    ensure_ready()
     if request.method == 'GET':
         return render_template('predict_csv.html')
 
@@ -215,9 +215,7 @@ def download_sample():
     return redirect(url_for('predict_single'))
 
 
-# ✅ CORRECT — ensure_ready() runs on BOTH local AND Vercel
-ensure_ready()      # <-- moved OUTSIDE the if block (runs on import)
-
 if __name__ == '__main__':
+    ensure_ready()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
