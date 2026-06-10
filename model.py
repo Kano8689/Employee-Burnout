@@ -33,12 +33,21 @@ def validate_csv(path):
     except Exception:
         return False
 
-
 class BurnoutPredictor:
     def __init__(self):
         self.model = None
         self.encoders = {}
         self.scaler = StandardScaler()
+
+    def get_saved_metrics(self):
+        """Load saved metrics + importance without retraining."""
+        path = os.path.join(BASE_DIR, 'metrics.json')
+        if os.path.exists(path):
+            with open(path) as f:
+                d = json.load(f)
+            return d['metrics'], d['importance']
+        # fallback: retrain if metrics file is missing
+        return self.train(CSV_PATH)
 
     # ── encode categoricals ──
     def _encode(self, df, fit=False):
@@ -117,7 +126,7 @@ class BurnoutPredictor:
             importance[fn] = round(float(self.model.feature_importances_[i]), 4)
         importance = dict(sorted(importance.items(), key=lambda x: x[1], reverse=True))
 
-        self.save()
+        self.save(metrics, importance)          # ← pass metrics + importance
         print(f"[OK] Trained. R2={metrics['r2']} RMSE={metrics['rmse']}")
         return metrics, importance
 
@@ -134,8 +143,8 @@ class BurnoutPredictor:
             contributions[fn] = round(float(self.model.feature_importances_[i]), 4)
         return pred, contributions
 
-    # ── save ──
-    def save(self):
+        # ── save ──
+    def save(self, metrics=None, importance=None):
         with open(PKL_PATH, 'wb') as f:
             pickle.dump(self.model, f)
 
@@ -144,14 +153,21 @@ class BurnoutPredictor:
             json.dump(enc, f)
 
         scl = {
-            'mean':  self.scaler.mean_.tolist(),
-            'scale': self.scaler.scale_.tolist(),
-            'var':   self.scaler.var_.tolist(),
-            'n_in':  int(self.scaler.n_features_in_),
+            'mean':         self.scaler.mean_.tolist(),
+            'scale':        self.scaler.scale_.tolist(),
+            'var':          self.scaler.var_.tolist(),
+            'n_in':         int(self.scaler.n_features_in_),
+            'n_samples':    int(self.scaler.n_samples_seen_),   # ← added
         }
         with open(SCL_PATH, 'w') as f:
             json.dump(scl, f)
-        print("[OK] Model + encoders + scaler saved.")
+
+        # save metrics + importance so model_info doesn't retrain
+        if metrics is not None and importance is not None:
+            with open(os.path.join(BASE_DIR, 'metrics.json'), 'w') as f:
+                json.dump({'metrics': metrics, 'importance': importance}, f)
+
+        print("[OK] Model + encoders + scaler + metrics saved.")
 
     # ── load ──
     def load(self):
@@ -176,9 +192,12 @@ class BurnoutPredictor:
                 self.scaler.scale_ = np.array(s['scale'])
                 self.scaler.var_ = np.array(s['var'])
                 self.scaler.n_features_in_ = s['n_in']
+                # restore n_samples_seen_ (default to 1 if old file)
+                self.scaler.n_samples_seen_ = s.get('n_samples', 1)
 
             print("[OK] Model loaded.")
             return True
         except Exception as e:
             print(f"[ERR] Load failed: {e}")
             return False
+        

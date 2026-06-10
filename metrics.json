@@ -1,0 +1,1 @@
+{"metrics": {"r2": 0.9701, "rmse": 0.0306, "mae": 0.0244, "train_rows": 2000, "test_rows": 500, "total_rows": 2500, "n_features": 6}, "importance": {"Mental_Fatigue_Score": 0.5111, "Resource_Allocation": 0.2502, "Designation": 0.1182, "WFH_Setup_Available": 0.0977, "Company_Type": 0.0208, "Gender": 0.0021}}

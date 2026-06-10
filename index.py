@@ -163,17 +163,16 @@ def predict_csv():
 @app.route('/model/info')
 def model_info():
     try:
-        metrics, importance = predictor.train(CSV_PATH)
+        # load saved metrics (no retraining)
+        metrics, importance = predictor.get_saved_metrics()
         imp = [{'name': FEATURE_DISPLAY.get(k, k), 'pct': round(v * 100, 2)}
                for k, v in importance.items()]
 
         df = pd.read_csv(CSV_PATH)
 
-        # Build a list of column info dicts (name + dtype)
         columns_info = []
         for col in df.columns:
             dtype = str(df[col].dtype)
-            # make dtype human-friendly
             if 'int' in dtype:
                 friendly = 'Integer'
             elif 'float' in dtype:
@@ -186,15 +185,15 @@ def model_info():
                 friendly = dtype
             columns_info.append({
                 'name': col,
-                'dtype': dtype,          # raw e.g. int64
-                'friendly': friendly,    # readable e.g. Integer
+                'dtype': dtype,
+                'friendly': friendly,
             })
 
         ds = {
             'rows': len(df),
             'cols': len(df.columns) - 1,
             'avg':  round(df['Burn_Rate'].mean(), 3),
-            'columns_info': columns_info,   # ← new richer data
+            'columns_info': columns_info,
         }
         return render_template('model_info.html',
                                metrics=metrics, importance=imp, ds=ds)

@@ -24,73 +24,79 @@
         </div>
 
         <form method="POST" action="/">
-            <div class="field">
-                <label>Gender</label>
-                <div class="input-icon">
-                    <i class="fas fa-user"></i>
-                    <select name="gender">
-                        <option value="Male" {% if result and result.input.Gender=='Male' %}selected{% endif %}>Male</option>
-                        <option value="Female" {% if result and result.input.Gender=='Female' %}selected{% endif %}>Female</option>
-                    </select>
-                </div>
-            </div>
+    <div class="field">
+        <label>Gender</label>
+        <div class="input-icon">
+            <i class="fas fa-user"></i>
+            <select name="gender" required>
+                <option value="" disabled {% if not result %}selected{% endif %}>Select Gender</option>
+                <option value="Male" {% if result and result.input.Gender=='Male' %}selected{% endif %}>Male</option>
+                <option value="Female" {% if result and result.input.Gender=='Female' %}selected{% endif %}>Female</option>
+            </select>
+        </div>
+    </div>
 
-            <div class="field">
-                <label>Company Type</label>
-                <div class="input-icon">
-                    <i class="fas fa-building"></i>
-                    <select name="company_type">
-                        <option value="Product" {% if result and result.input.Company_Type=='Product' %}selected{% endif %}>Product</option>
-                        <option value="Service" {% if result and result.input.Company_Type=='Service' %}selected{% endif %}>Service</option>
-                    </select>
-                </div>
-            </div>
+    <div class="field">
+        <label>Company Type</label>
+        <div class="input-icon">
+            <i class="fas fa-building"></i>
+            <select name="company_type" required>
+                <option value="" disabled {% if not result %}selected{% endif %}>Select Company Type</option>
+                <option value="Product" {% if result and result.input.Company_Type=='Product' %}selected{% endif %}>Product</option>
+                <option value="Service" {% if result and result.input.Company_Type=='Service' %}selected{% endif %}>Service</option>
+            </select>
+        </div>
+    </div>
 
-            <div class="field">
-                <label>WFH Setup Available</label>
-                <div class="input-icon">
-                    <i class="fas fa-house-laptop"></i>
-                    <select name="wfh_setup">
-                        <option value="Yes" {% if result and result.input.WFH_Setup_Available=='Yes' %}selected{% endif %}>Yes</option>
-                        <option value="No" {% if result and result.input.WFH_Setup_Available=='No' %}selected{% endif %}>No</option>
-                    </select>
-                </div>
-            </div>
+    <div class="field">
+        <label>WFH Setup Available</label>
+        <div class="input-icon">
+            <i class="fas fa-house-laptop"></i>
+            <select name="wfh_setup" required>
+                <option value="" disabled {% if not result %}selected{% endif %}>Select Option</option>
+                <option value="Yes" {% if result and result.input.WFH_Setup_Available=='Yes' %}selected{% endif %}>Yes</option>
+                <option value="No" {% if result and result.input.WFH_Setup_Available=='No' %}selected{% endif %}>No</option>
+            </select>
+        </div>
+    </div>
 
-            <div class="field">
-                <label>Designation Level</label>
-                <div class="input-icon">
-                    <i class="fas fa-chart-simple"></i>
-                    <select name="designation">
-                        {% for i in range(0,6) %}
-                        <option value="{{ i }}" {% if result and result.input.Designation==i %}selected{% elif not result and i==3 %}selected{% endif %}>Level {{ i }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
+    <div class="field">
+        <label>Designation (Level 0 - 5)</label>
+        <div class="input-icon">
+            <i class="fas fa-chart-simple"></i>
+            <select name="designation" required>
+                <option value="" disabled {% if not result %}selected{% endif %}>Select Designation Level</option>
+                {% for i in range(0, 6) %}
+                <option value="{{ i }}" {% if result and result.input.Designation==i %}selected{% endif %}>Level {{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
 
-            <div class="field">
-                <label>Resource Allocation (1 - 10)</label>
-                <div class="input-icon">
-                    <i class="fas fa-clock"></i>
-                    <input type="number" name="resource_allocation" min="1" max="10"
-                           value="{{ result.input.Resource_Allocation if result else 7 }}" required>
-                </div>
-            </div>
+    <div class="field">
+        <label>Resource Allocation (1 - 10)</label>
+        <div class="input-icon">
+            <i class="fas fa-clock"></i>
+            <input type="number" name="resource_allocation" min="1" max="10"
+                   placeholder="Enter value between 1 and 10"
+                   value="{{ result.input.Resource_Allocation if result else '' }}" required>
+        </div>
+    </div>
 
-            <div class="field">
-                <label>Mental Fatigue Score (0 - 10)</label>
-                <div class="input-icon">
-                    <i class="fas fa-brain"></i>
-                    <input type="number" name="mental_fatigue" min="0" max="10" step="0.1"
-                           value="{{ result.input.Mental_Fatigue_Score if result else 5 }}" required>
-                </div>
-            </div>
+    <div class="field">
+        <label>Mental Fatigue Score (0 - 10)</label>
+        <div class="input-icon">
+            <i class="fas fa-brain"></i>
+            <input type="number" name="mental_fatigue" min="0" max="10" step="0.1"
+                   placeholder="Enter value between 0 and 10"
+                   value="{{ result.input.Mental_Fatigue_Score if result else '' }}" required>
+        </div>
+    </div>
 
-            <button type="submit" class="btn-submit">
-                <i class="fas fa-magnifying-glass"></i> Predict Burnout Level
-            </button>
-        </form>
+    <button type="submit" class="btn-submit">
+        <i class="fas fa-magnifying-glass"></i> Predict Burnout Level
+    </button>
+</form>
     </section>
 
     <!-- RIGHT: Result -->
