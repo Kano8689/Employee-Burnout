@@ -53,15 +53,17 @@ This project aims to identify employees who may be at risk of burnout by analyzi
 ```text
 Employee-Burnout/
 │
-├── index.py                 # Main Flask application
-├── model.py                 # ML model: train, predict, save/load
-├── requirements.txt
+├── index.py                 # Main Flask application and routes
+├── model.py                 # Machine Learning model training, loading and prediction
+├── requirements.txt         # Python dependencies for local/Vercel deployment
+├── runtime.txt              # Python version used by Vercel
 │
-├── burnout_dataset.csv      # Dataset
-├── burnout_model.pkl        # Trained model
-├── encoders.json            # Label encoders
-├── scaler.json              # Feature scaler
-├── metrics.json             # Saved metrics
+├── burnout_dataset.csv      # Employee burnout training dataset
+├── burnout_model.pkl        # Trained Random Forest model
+├── encoders.json            # Saved LabelEncoder mappings
+├── scaler.json              # Saved StandardScaler parameters
+├── metrics.json             # Model performance metrics and feature importance
+├── vercel.json              # Vercel deployment configuration
 │
 ├── static/
 │   ├── css/
