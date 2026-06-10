@@ -1,0 +1,33 @@
+:root {
+    --primary: #2563eb;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+}
+body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+.navbar { background: var(--primary); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+.logo { color: white; font-size: 1.5rem; font-weight: bold; }
+.nav-links { list-style: none; display: flex; gap: 20px; }
+.nav-links a { color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; }
+.nav-links a.active, .nav-links a:hover { background: rgba(255,255,255,0.2); }
+
+.container { padding: 2rem; max-width: 1200px; margin: auto; }
+.card { background: var(--card); padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+
+/* Form Styles */
+.split-screen { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+form { display: flex; flex-direction: column; gap: 10px; }
+input { padding: 10px; border: 1px solid #cbd5e1; border-radius: 5px; }
+button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+button:hover { background: #1d4ed8; }
+
+/* Speedometer Styles */
+.gauge-container { position: relative; width: 300px; margin: 0 auto; }
+.gauge-labels { display: flex; justify-content: space-between; font-weight: bold; margin-top: -20px; }
+.gauge-value { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 2rem; font-weight: bold; color: var(--primary); }
+
+/* Table Styles */
+.table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+.table th, .table td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
+.table th { background: #f1f5f9; }
+.download-btn { display: inline-block; margin-top: 1rem; background: #10b981; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
