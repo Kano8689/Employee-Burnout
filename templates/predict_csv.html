@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Bulk CSV Prediction{% endblock %}
+{% block content %}
+
+<header class="page-hero">
+    <div class="hero-icon"><i class="fas fa-file-csv"></i></div>
+    <div>
+        <h1>Bulk Burnout Prediction</h1>
+        <p>Upload a CSV file with multiple employees — predict all at once</p>
+    </div>
+</header>
+
+<div class="two-col">
+
+    <section class="panel">
+        <div class="panel-head">
+            <div class="panel-icon blue"><i class="fas fa-cloud-arrow-up"></i></div>
+            <div>
+                <h2>Upload CSV</h2>
+                <p>Drag & drop or browse your file</p>
+            </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" action="/predict/csv">
+            <div class="drop-zone" id="dropZone">
+                <i class="fas fa-file-csv"></i>
+                <p>Drag & drop CSV here or <strong>click to browse</strong></p>
+                <input type="file" name="csv_file" accept=".csv" id="fileInput" required>
+            </div>
+            <p class="file-name" id="fileName"></p>
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-bolt"></i> Predict All Rows
+            </button>
+        </form>
+
+        <a href="/download/sample" class="btn-outline">
+            <i class="fas fa-download"></i> Download Sample CSV
+        </a>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <div class="panel-icon purple"><i class="fas fa-circle-info"></i></div>
+            <div>
+                <h2>Required Columns</h2>
+                <p>Your CSV must have these headers</p>
+            </div>
+        </div>
+
+        <table class="mini-table">
+            <thead><tr><th>Column Name</th><th>Example</th></tr></thead>
+            <tbody>
+                <tr><td>Gender</td><td>Male</td></tr>
+                <tr><td>Company_Type</td><td>Product</td></tr>
+                <tr><td>WFH_Setup_Available</td><td>Yes</td></tr>
+                <tr><td>Designation</td><td>3</td></tr>
+                <tr><td>Resource_Allocation</td><td>7</td></tr>
+                <tr><td>Mental_Fatigue_Score</td><td>5.5</td></tr>
+            </tbody>
+        </table>
+        <p class="hint"><i class="fas fa-lightbulb"></i> Click "Download Sample CSV" to get a ready-made template.</p>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const dz = document.getElementById('dropZone');
+const fi = document.getElementById('fileInput');
+const fn = document.getElementById('fileName');
+dz.addEventListener('click', () => fi.click());
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('over');
+    fi.files = e.dataTransfer.files;
+    if (fi.files.length) fn.textContent = '📄 ' + fi.files[0].name;
+});
+fi.addEventListener('change', () => { if (fi.files.length) fn.textContent = '📄 ' + fi.files[0].name; });
+</script>
+{% endblock %}

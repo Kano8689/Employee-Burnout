@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block title %}Single Prediction — Burnout Predictor{% endblock %}
+{% block content %}
+
+<!-- Gradient Header -->
+<header class="page-hero">
+    <div class="hero-icon"><i class="fas fa-heart-pulse"></i></div>
+    <div>
+        <h1>Employee Burnout Prediction</h1>
+        <p>Predict the burnout level of an employee</p>
+    </div>
+</header>
+
+<div class="two-col">
+
+    <!-- LEFT: Form -->
+    <section class="panel">
+        <div class="panel-head">
+            <div class="panel-icon blue"><i class="fas fa-clipboard"></i></div>
+            <div>
+                <h2>Employee Details</h2>
+                <p>Enter the employee information below</p>
+            </div>
+        </div>
+
+        <form method="POST" action="/">
+            <div class="field">
+                <label>Gender</label>
+                <div class="input-icon">
+                    <i class="fas fa-user"></i>
+                    <select name="gender">
+                        <option value="Male" {% if result and result.input.Gender=='Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if result and result.input.Gender=='Female' %}selected{% endif %}>Female</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Company Type</label>
+                <div class="input-icon">
+                    <i class="fas fa-building"></i>
+                    <select name="company_type">
+                        <option value="Product" {% if result and result.input.Company_Type=='Product' %}selected{% endif %}>Product</option>
+                        <option value="Service" {% if result and result.input.Company_Type=='Service' %}selected{% endif %}>Service</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>WFH Setup Available</label>
+                <div class="input-icon">
+                    <i class="fas fa-house-laptop"></i>
+                    <select name="wfh_setup">
+                        <option value="Yes" {% if result and result.input.WFH_Setup_Available=='Yes' %}selected{% endif %}>Yes</option>
+                        <option value="No" {% if result and result.input.WFH_Setup_Available=='No' %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Designation Level</label>
+                <div class="input-icon">
+                    <i class="fas fa-chart-simple"></i>
+                    <select name="designation">
+                        {% for i in range(0,6) %}
+                        <option value="{{ i }}" {% if result and result.input.Designation==i %}selected{% elif not result and i==3 %}selected{% endif %}>Level {{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Resource Allocation (1 - 10)</label>
+                <div class="input-icon">
+                    <i class="fas fa-clock"></i>
+                    <input type="number" name="resource_allocation" min="1" max="10"
+                           value="{{ result.input.Resource_Allocation if result else 7 }}" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Mental Fatigue Score (0 - 10)</label>
+                <div class="input-icon">
+                    <i class="fas fa-brain"></i>
+                    <input type="number" name="mental_fatigue" min="0" max="10" step="0.1"
+                           value="{{ result.input.Mental_Fatigue_Score if result else 5 }}" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-magnifying-glass"></i> Predict Burnout Level
+            </button>
+        </form>
+    </section>
+
+    <!-- RIGHT: Result -->
+    <div class="right-col">
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-icon purple"><i class="fas fa-chart-line"></i></div>
+                <div>
+                    <h2>Prediction Result</h2>
+                    <p>The predicted burnout level will appear below</p>
+                </div>
+            </div>
+
+            <div class="result-zone">
+                <canvas id="speedo" width="380" height="220"></canvas>
+
+                {% if result %}
+                <p class="result-caption">Predicted Burnout Level</p>
+                <p class="result-value" style="color:{{ result.color }}">{{ '%.2f'|format(result.prediction) }}</p>
+                <p class="result-level" style="color:{{ result.color }}">{{ result.level }}</p>
+
+                <div class="result-note" style="border-color:{{ result.color }};background:{{ result.color }}15">
+                    <i class="fas fa-circle-exclamation" style="color:{{ result.color }}"></i>
+                    <span>{{ result.message }}</span>
+                </div>
+                {% else %}
+                <p class="result-caption">Predicted Burnout Level</p>
+                <p class="result-value" style="color:#94a3b8">--</p>
+                <p class="result-placeholder">Fill the form and click predict</p>
+                {% endif %}
+            </div>
+        </section>
+
+        {% if result %}
+        <!-- Factor Impact -->
+        <section class="panel">
+            <h3 class="mini-title"><i class="fas fa-layer-group"></i> Factor Impact (%)</h3>
+            <div class="impact-list">
+                {% for c in result.contributions %}
+                <div class="impact-row">
+                    <span class="impact-name">{{ c.name }}</span>
+                    <div class="impact-track">
+                        <div class="impact-bar" style="width:{{ c.pct }}%"></div>
+                    </div>
+                    <span class="impact-pct">{{ c.pct }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Guide -->
+        <section class="panel">
+            <h3 class="mini-title">Burnout Level Guide</h3>
+            <div class="guide-grid">
+                <div class="guide-item">
+                    <span class="dot green"></span>
+                    <div><strong>Low Burnout</strong><br><small>0.00 – 0.30</small></div>
+                </div>
+                <div class="guide-item">
+                    <span class="dot orange"></span>
+                    <div><strong>Medium Burnout</strong><br><small>0.31 – 0.60</small></div>
+                </div>
+                <div class="guide-item">
+                    <span class="dot red"></span>
+                    <div><strong>High Burnout</strong><br><small>0.61 – 1.00</small></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/speedometer.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const s = new Speedometer('speedo', 380, 220, 150);
+    {% if result %}
+        s.animate({{ result.prediction }});
+    {% else %}
+        s.draw(0);
+    {% endif %}
+});
+</script>
+{% endblock %}

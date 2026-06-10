@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Batch Results{% endblock %}
+{% block content %}
+
+<header class="page-hero">
+    <div class="hero-icon"><i class="fas fa-table-list"></i></div>
+    <div>
+        <h1>Batch Prediction Results</h1>
+        <p>File: {{ filename }} — {{ summary.total }} employees analysed</p>
+    </div>
+</header>
+
+<!-- Summary cards -->
+<div class="summary-grid">
+    <div class="sum-card"><div class="sum-num">{{ summary.total }}</div><div class="sum-lbl">Total</div></div>
+    <div class="sum-card"><div class="sum-num">{{ summary.avg }}</div><div class="sum-lbl">Avg Burn Rate</div></div>
+    <div class="sum-card green"><div class="sum-num">{{ summary.low }}</div><div class="sum-lbl">Low</div></div>
+    <div class="sum-card orange"><div class="sum-num">{{ summary.medium }}</div><div class="sum-lbl">Medium</div></div>
+    <div class="sum-card red"><div class="sum-num">{{ summary.high }}</div><div class="sum-lbl">High</div></div>
+</div>
+
+<!-- Distribution -->
+<section class="panel">
+    <h3 class="mini-title">Risk Distribution</h3>
+    {% set t = summary.total if summary.total else 1 %}
+    <div class="dist">
+        <div class="dist-seg green" style="width:{{ (summary.low/t*100)|round(1) }}%">{{ summary.low }}</div>
+        <div class="dist-seg orange" style="width:{{ (summary.medium/t*100)|round(1) }}%">{{ summary.medium }}</div>
+        <div class="dist-seg red" style="width:{{ (summary.high/t*100)|round(1) }}%">{{ summary.high }}</div>
+    </div>
+</section>
+
+<!-- Top 5 speedometers -->
+<section class="panel">
+    <h3 class="mini-title"><i class="fas fa-gauge-high"></i> Top 5 Highest Risk Employees</h3>
+    <div class="speedo-row">
+    {% for r in top5 %}
+        <div class="mini-speedo">
+            <p class="ms-label">{{ r.Company_Type }} · Lvl {{ r.Designation }}</p>
+            <canvas id="ms{{ loop.index }}" width="180" height="110"></canvas>
+            <p class="ms-score" style="color:{{ r.Color }}">{{ '%.2f'|format(r.Predicted_Burn_Rate) }}</p>
+            <p class="ms-level" style="color:{{ r.Color }}">{{ r.Burnout_Level }}</p>
+        </div>
+    {% endfor %}
+    </div>
+</section>
+
+<!-- Table -->
+<section class="panel">
+    <h3 class="mini-title"><i class="fas fa-list"></i> All Predictions</h3>
+    <div class="table-scroll">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>#</th><th>Gender</th><th>Company</th><th>WFH</th>
+                <th>Desig.</th><th>Resource</th><th>Fatigue</th><th>Burn Rate</th><th>Level</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for r in results %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ r.Gender }}</td>
+            <td>{{ r.Company_Type }}</td>
+            <td>{{ r.WFH_Setup_Available }}</td>
+            <td>{{ r.Designation }}</td>
+            <td>{{ r.Resource_Allocation }}</td>
+            <td>{{ r.Mental_Fatigue_Score }}</td>
+            <td><strong style="color:{{ r.Color }}">{{ '%.2f'|format(r.Predicted_Burn_Rate) }}</strong></td>
+            <td><span class="pill" style="background:{{ r.Color }}">{{ r.Burnout_Level }}</span></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</section>
+
+<div class="center-actions">
+    <a href="/predict/csv" class="btn-outline"><i class="fas fa-arrow-left"></i> Upload Another</a>
+    <a href="/" class="btn-outline"><i class="fas fa-house"></i> Home</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/speedometer.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const scores = {{ top5_scores | default([]) | tojson }};
+    for (let i = 0; i < Math.min(scores.length, 5); i++) {
+        const s = new Speedometer('ms' + (i+1), 180, 110, 72);
+        s.animate(scores[i]);
+    }
+});
+</script>
+{% endblock %}

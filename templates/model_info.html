@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Model Insights{% endblock %}
+{% block content %}
+
+<header class="page-hero">
+    <div class="hero-icon"><i class="fas fa-chart-column"></i></div>
+    <div>
+        <h1>Model Insights</h1>
+        <p>Random Forest Regressor — performance & feature importance</p>
+    </div>
+</header>
+
+<div class="summary-grid">
+    <div class="sum-card"><div class="sum-num">{{ metrics.r2 }}</div><div class="sum-lbl">R² Score</div></div>
+    <div class="sum-card"><div class="sum-num">{{ metrics.rmse }}</div><div class="sum-lbl">RMSE</div></div>
+    <div class="sum-card"><div class="sum-num">{{ metrics.mae }}</div><div class="sum-lbl">MAE</div></div>
+    <div class="sum-card"><div class="sum-num">{{ metrics.total_rows }}</div><div class="sum-lbl">Total Rows</div></div>
+    <div class="sum-card"><div class="sum-num">{{ metrics.n_features }}</div><div class="sum-lbl">Features</div></div>
+</div>
+
+<section class="panel">
+    <h3 class="mini-title"><i class="fas fa-ranking-star"></i> Feature Importance (%)</h3>
+    <div class="impact-list">
+        {% for f in importance %}
+        <div class="impact-row big">
+            <span class="rank">{{ loop.index }}</span>
+            <span class="impact-name">{{ f.name }}</span>
+            <div class="impact-track">
+                <div class="impact-bar grad" style="width:{{ f.pct }}%"></div>
+            </div>
+            <span class="impact-pct">{{ f.pct }}%</span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="panel">
+    <h3 class="mini-title"><i class="fas fa-database"></i> Dataset Columns</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Column Name</th>
+                <th>Data Type</th>
+                <th>Role</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for col in ds.columns_info %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td><code>{{ col.name }}</code></td>
+            <td>
+                <span class="dtype-badge">{{ col.friendly }}</span>
+                <small class="dtype-raw">({{ col.dtype }})</small>
+            </td>
+            <td>
+                {% if col.name == 'Burn_Rate' %}
+                    <span class="pill" style="background:#e74c3c">Target</span>
+                {% elif col.name == 'Employee_ID' %}
+                    <span class="pill" style="background:#94a3b8">ID</span>
+                {% else %}
+                    <span class="pill" style="background:#3b82f6">Feature</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<div class="center-actions">
+    <a href="/" class="btn-outline"><i class="fas fa-house"></i> Home</a>
+    <a href="/predict/single" class="btn-outline"><i class="fas fa-user"></i> Try Prediction</a>
+</div>
+{% endblock %}
