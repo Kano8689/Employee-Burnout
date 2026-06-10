@@ -34,20 +34,61 @@ def validate_csv(path):
         return False
 
 class BurnoutPredictor:
-    def __init__(self):
-        self.model = None
-        self.encoders = {}
-        self.scaler = StandardScaler()
+        def __init__(self):
+            self.model = None
+            self.encoders = {}
+            self.scaler = StandardScaler()
+            self._cached_metrics = None        # <-- add
+            self._cached_importance = None     # <-- add
 
-    def get_saved_metrics(self):
-        """Load saved metrics + importance without retraining."""
-        path = os.path.join(BASE_DIR, 'metrics.json')
-        if os.path.exists(path):
-            with open(path) as f:
-                d = json.load(f)
-            return d['metrics'], d['importance']
-        # fallback: retrain if metrics file is missing
-        return self.train(CSV_PATH)
+        def train_in_memory(self, csv_path=None):
+            """Train model in memory WITHOUT saving to disk (Vercel-safe)."""
+            if csv_path is None:
+                csv_path = CSV_PATH
+
+            df = pd.read_csv(csv_path)
+            X, y = self._prepare(df, fit=True)
+
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=0.2, random_state=42
+            )
+
+            self.model = RandomForestRegressor(
+                n_estimators=200, max_depth=12,
+                min_samples_split=5, min_samples_leaf=2,
+                random_state=42, n_jobs=-1
+            )
+            self.model.fit(X_train, y_train)
+
+            y_pred = np.clip(self.model.predict(X_test), 0, 1)
+            metrics = {
+                'r2':         round(r2_score(y_test, y_pred), 4),
+                'rmse':       round(float(np.sqrt(mean_squared_error(y_test, y_pred))), 4),
+                'mae':        round(float(mean_absolute_error(y_test, y_pred)), 4),
+                'train_rows': len(X_train),
+                'test_rows':  len(X_test),
+                'total_rows': len(df),
+                'n_features': X.shape[1],
+            }
+
+            importance = {}
+            for i, fn in enumerate(ALL_FEATURES):
+                importance[fn] = round(float(self.model.feature_importances_[i]), 4)
+            importance = dict(sorted(importance.items(), key=lambda x: x[1], reverse=True))
+
+            # store in memory for model_info page
+            self._cached_metrics = metrics
+            self._cached_importance = importance
+
+            print(f"[OK] In-memory training done. R2={metrics['r2']}")
+            return metrics, importance
+
+        def get_saved_metrics(self):
+            """Return cached metrics from in-memory training."""
+            if hasattr(self, '_cached_metrics') and self._cached_metrics:
+                return self._cached_metrics, self._cached_importance
+            # fallback: train if not cached
+            return self.train_in_memory(CSV_PATH)
 
     # ── encode categoricals ──
     def _encode(self, df, fit=False):

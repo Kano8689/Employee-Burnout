@@ -19,18 +19,24 @@ predictor = BurnoutPredictor()
 
 
 def ensure_ready():
+    """
+    Train the model in-memory on startup.
+    Works on Vercel (read-only FS) because we never need to write/load .pkl.
+    The dataset CSV is committed to the repo.
+    """
     global predictor
-    if os.path.exists(PKL_PATH):
-        if predictor.load():
-            print("[OK] Pre-trained model loaded.")
-            return
-    print("[INFO] Model files not found. Training...")
     try:
+        # Make sure dataset exists (it's committed, but generate as fallback)
         if not validate_csv(CSV_PATH):
             generate_dataset()
-        predictor.train(CSV_PATH)
+
+        # Train fresh in memory — no pickle loading, no version mismatch
+        predictor.train_in_memory(CSV_PATH)
+        print("[OK] Model trained in memory and ready.")
     except Exception as e:
-        print(f"[WARN] Could not train: {e}")
+        import traceback
+        traceback.print_exc()
+        print(f"[ERR] ensure_ready failed: {e}")
 
 
 FEATURE_DISPLAY = {
@@ -166,31 +172,18 @@ def predict_csv():
 @app.route('/model/info')
 def model_info():
     try:
-        # load saved metrics (no retraining)
         metrics, importance = predictor.get_saved_metrics()
         imp = [{'name': FEATURE_DISPLAY.get(k, k), 'pct': round(v * 100, 2)}
                for k, v in importance.items()]
 
         df = pd.read_csv(CSV_PATH)
-
         columns_info = []
         for col in df.columns:
             dtype = str(df[col].dtype)
-            if 'int' in dtype:
-                friendly = 'Integer'
-            elif 'float' in dtype:
-                friendly = 'Decimal'
-            elif 'object' in dtype:
-                friendly = 'Text'
-            elif 'bool' in dtype:
-                friendly = 'Boolean'
-            else:
-                friendly = dtype
-            columns_info.append({
-                'name': col,
-                'dtype': dtype,
-                'friendly': friendly,
-            })
+            friendly = ('Integer' if 'int' in dtype else
+                        'Decimal' if 'float' in dtype else
+                        'Text' if 'object' in dtype else dtype)
+            columns_info.append({'name': col, 'dtype': dtype, 'friendly': friendly})
 
         ds = {
             'rows': len(df),
@@ -222,7 +215,9 @@ def download_sample():
     return redirect(url_for('predict_single'))
 
 
+# ✅ CORRECT — ensure_ready() runs on BOTH local AND Vercel
+ensure_ready()      # <-- moved OUTSIDE the if block (runs on import)
+
 if __name__ == '__main__':
-    ensure_ready()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
