@@ -6,7 +6,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def generate_dataset(n_samples=2500):
-    return
     """
     Generates a dataset matching the real Kaggle Employee Burnout dataset.
     Fields: Gender, Company_Type, WFH_Setup_Available,
