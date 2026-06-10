@@ -6,6 +6,14 @@ The project combines **Data Preprocessing**, **Feature Engineering**, **Machine 
 
 ---
 
+## 🌐 Live Link
+
+**Krishnam Mavani**
+
+* Live Link: https://employeeburnoutml.vercel.app/
+
+---
+
 ## 🚀 Project Highlights
 
 * Machine Learning-Based Burnout Score Prediction (0 – 1)
@@ -364,14 +372,6 @@ Through this project, I gained hands-on experience in:
 **Krishnam Mavani**
 
 * GitHub: https://github.com/kano8689
-
----
-
-## 🌐 Live Link
-
-**Krishnam Mavani**
-
-* Live Link: https://employee-burnout-two.vercel.app/
 
 ---
 
