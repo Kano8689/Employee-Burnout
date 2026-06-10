@@ -12,29 +12,22 @@ from generate_dataset import generate_dataset
 
 app = Flask(__name__)
 app.secret_key = 'burnout-secret-2024'
-
-IS_VERCEL = os.environ.get('VERCEL') == '1'
-UPLOAD_FOLDER = '/tmp/uploads' if IS_VERCEL else os.path.join(
-os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 predictor = BurnoutPredictor()
 
 
 def ensure_ready():
-    """Train model lazily on first request (Vercel-safe)."""
-    global predictor
-    if predictor.model is not None:
-        return  # already trained
-    try:
-        if not validate_csv(CSV_PATH):
-            generate_dataset()
-        predictor.train_in_memory(CSV_PATH)
-        print("[OK] Model ready.")
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        print(f"[ERR] {e}")
+    if not validate_csv(CSV_PATH):
+        print("[INFO] Generating dataset...")
+        generate_dataset()
+    if not os.path.exists(PKL_PATH):
+        print("[INFO] Training model...")
+        predictor.train(CSV_PATH)
+    else:
+        if not predictor.load():
+            predictor.train(CSV_PATH)
 
 
 FEATURE_DISPLAY = {
@@ -65,7 +58,6 @@ def fmt_contributions(contribs):
 # ─── Main page (single prediction, matches your UI) ───
 @app.route('/', methods=['GET', 'POST'])
 def predict_single():
-    # ensure_ready()
     result = None
     if request.method == 'POST':
         try:
@@ -97,7 +89,6 @@ def predict_single():
 # ─── CSV batch prediction ───
 @app.route('/predict/csv', methods=['GET', 'POST'])
 def predict_csv():
-    # ensure_ready()
     if request.method == 'GET':
         return render_template('predict_csv.html')
 
@@ -172,18 +163,31 @@ def predict_csv():
 @app.route('/model/info')
 def model_info():
     try:
+        # load saved metrics (no retraining)
         metrics, importance = predictor.get_saved_metrics()
         imp = [{'name': FEATURE_DISPLAY.get(k, k), 'pct': round(v * 100, 2)}
                for k, v in importance.items()]
 
         df = pd.read_csv(CSV_PATH)
+
         columns_info = []
         for col in df.columns:
             dtype = str(df[col].dtype)
-            friendly = ('Integer' if 'int' in dtype else
-                        'Decimal' if 'float' in dtype else
-                        'Text' if 'object' in dtype else dtype)
-            columns_info.append({'name': col, 'dtype': dtype, 'friendly': friendly})
+            if 'int' in dtype:
+                friendly = 'Integer'
+            elif 'float' in dtype:
+                friendly = 'Decimal'
+            elif 'object' in dtype:
+                friendly = 'Text'
+            elif 'bool' in dtype:
+                friendly = 'Boolean'
+            else:
+                friendly = dtype
+            columns_info.append({
+                'name': col,
+                'dtype': dtype,
+                'friendly': friendly,
+            })
 
         ds = {
             'rows': len(df),
@@ -216,6 +220,8 @@ def download_sample():
 
 
 if __name__ == '__main__':
-    # ensure_ready()
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    ensure_ready()
+    print("\n" + "=" * 50)
+    print("  Burnout Predictor: http://localhost:5000")
+    print("=" * 50 + "\n")
+    app.run(debug=True, port=5000)
