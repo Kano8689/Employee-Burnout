@@ -65,7 +65,7 @@ def fmt_contributions(contribs):
 # ─── Main page (single prediction, matches your UI) ───
 @app.route('/', methods=['GET', 'POST'])
 def predict_single():
-    ensure_ready()
+    # ensure_ready()
     result = None
     if request.method == 'POST':
         try:
@@ -97,7 +97,7 @@ def predict_single():
 # ─── CSV batch prediction ───
 @app.route('/predict/csv', methods=['GET', 'POST'])
 def predict_csv():
-    ensure_ready()
+    # ensure_ready()
     if request.method == 'GET':
         return render_template('predict_csv.html')
 
@@ -216,6 +216,6 @@ def download_sample():
 
 
 if __name__ == '__main__':
-    ensure_ready()
+    # ensure_ready()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
