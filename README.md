@@ -47,7 +47,6 @@ Employee-Burnout/
 │
 ├── index.py                 # Main Flask application
 ├── model.py                 # ML model: train, predict, save/load
-├── generate_dataset.py      # Generates the burnout dataset
 ├── requirements.txt
 │
 ├── burnout_dataset.csv      # Auto-generated dataset
