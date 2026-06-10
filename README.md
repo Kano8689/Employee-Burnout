@@ -11,7 +11,7 @@ The project combines **Data Preprocessing**, **Feature Engineering**, **Machine 
 * Machine Learning-Based Burnout Score Prediction (0 – 1)
 * Random Forest Regression Model
 * Feature Importance Analysis (which factor impacts how much %)
-* Interactive Animated Speedometer Gauge (0 = left, 1 = right)
+* Interactive Animated Speedometer Gauge (0 = low, 1 = high)
 * Single-Employee Real-Time Prediction
 * Bulk CSV Batch Prediction with Summary Dashboard
 * Model Insights Page (R², RMSE, MAE + Feature Importance)
@@ -49,11 +49,11 @@ Employee-Burnout/
 ├── model.py                 # ML model: train, predict, save/load
 ├── requirements.txt
 │
-├── burnout_dataset.csv      # Auto-generated dataset
-├── burnout_model.pkl        # Auto-generated trained model
-├── encoders.json            # Auto-generated label encoders
-├── scaler.json              # Auto-generated feature scaler
-├── metrics.json             # Auto-generated saved metrics
+├── burnout_dataset.csv      # Dataset
+├── burnout_model.pkl        # Trained model
+├── encoders.json            # Label encoders
+├── scaler.json              # Feature scaler
+├── metrics.json             # Saved metrics
 │
 ├── static/
 │   ├── css/
@@ -75,14 +75,6 @@ Employee-Burnout/
 ---
 
 ## 📁 Project Components
-
-### `generate_dataset.py`
-
-Responsible for:
-
-* Generating a realistic Employee Burnout dataset
-* Creating correlated features and a target `Burn_Rate` (0 – 1)
-* Saving the dataset as `burnout_dataset.csv`
 
 ### `model.py`
 
@@ -372,6 +364,13 @@ Through this project, I gained hands-on experience in:
 **Krishnam Mavani**
 
 * GitHub: https://github.com/kano8689
+
+---
+
+## 🌐 Live Link
+
+**Krishnam Mavani**
+
 * Live Link: https://employee-burnout-two.vercel.app/
 
 ---

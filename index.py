@@ -8,7 +8,7 @@ from flask import (Flask, render_template, request,
 
 from model import (BurnoutPredictor, PKL_PATH, CSV_PATH,
                    validate_csv, ALL_FEATURES)
-# from generate_dataset import generate_dataset
+from generate_dataset import generate_dataset
 
 app = Flask(__name__)
 app.secret_key = 'burnout-secret-2024'
@@ -21,7 +21,7 @@ predictor = BurnoutPredictor()
 def ensure_ready():
     if not validate_csv(CSV_PATH):
         print("[INFO] Generating dataset...")
-        # generate_dataset()
+        generate_dataset()
     if not os.path.exists(PKL_PATH):
         print("[INFO] Training model...")
         predictor.train(CSV_PATH)
