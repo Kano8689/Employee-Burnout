@@ -16,6 +16,22 @@ UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 predictor = BurnoutPredictor()
+ensure_ready_called = False
+
+def startup():
+    global ensure_ready_called
+    if not ensure_ready_called:
+        ensure_ready()
+        ensure_ready_called = True
+
+FEATURE_DISPLAY = {
+    'Mental_Fatigue_Score': 'Mental Fatigue Score',
+    'Resource_Allocation':  'Resource Allocation',
+    'Designation':          'Designation Level',
+    'WFH_Setup_Available':  'WFH Setup',
+    'Company_Type':         'Company Type',
+    'Gender':               'Gender',
+}
 
 
 def ensure_ready():
@@ -30,14 +46,6 @@ def ensure_ready():
             predictor.train(CSV_PATH)
 
 
-FEATURE_DISPLAY = {
-    'Mental_Fatigue_Score': 'Mental Fatigue Score',
-    'Resource_Allocation':  'Resource Allocation',
-    'Designation':          'Designation Level',
-    'WFH_Setup_Available':  'WFH Setup',
-    'Company_Type':         'Company Type',
-    'Gender':               'Gender',
-}
 
 
 def burnout_label(score):
@@ -58,6 +66,7 @@ def fmt_contributions(contribs):
 # ─── Main page (single prediction, matches your UI) ───
 @app.route('/', methods=['GET', 'POST'])
 def predict_single():
+    startup()
     result = None
     if request.method == 'POST':
         try:
@@ -89,6 +98,7 @@ def predict_single():
 # ─── CSV batch prediction ───
 @app.route('/predict/csv', methods=['GET', 'POST'])
 def predict_csv():
+    startup()
     if request.method == 'GET':
         return render_template('predict_csv.html')
 
@@ -101,9 +111,7 @@ def predict_csv():
         return redirect(url_for('predict_csv'))
 
     try:
-        path = os.path.join(UPLOAD_FOLDER, f.filename)
-        f.save(path)
-        df = pd.read_csv(path)
+        df = pd.read_csv(f)
         if df.empty:
             flash('CSV is empty.', 'warning')
             return redirect(url_for('predict_csv'))
@@ -162,6 +170,7 @@ def predict_csv():
 # ─── Model insights ───
 @app.route('/model/info')
 def model_info():
+    startup()
     try:
         # load saved metrics (no retraining)
         metrics, importance = predictor.get_saved_metrics()
@@ -206,6 +215,7 @@ def model_info():
 # ─── Sample CSV download ───
 @app.route('/download/sample')
 def download_sample():
+    startup()
     if validate_csv(CSV_PATH):
         df = pd.read_csv(CSV_PATH).head(20)
         if 'Burn_Rate' in df.columns:
@@ -220,8 +230,5 @@ def download_sample():
 
 
 if __name__ == '__main__':
-    ensure_ready()
-    print("\n" + "=" * 50)
-    print("  Burnout Predictor: http://localhost:5000")
-    print("=" * 50 + "\n")
+    startup()
     app.run(debug=True, port=5000)
