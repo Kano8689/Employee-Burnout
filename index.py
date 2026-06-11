@@ -155,8 +155,6 @@ def predict_csv():
         # ── Top 5 highest-risk employees (computed in Python) ──
         top5 = sorted(results, key=lambda r: r['Predicted_Burn_Rate'], reverse=True)[:5]
         top5_scores = [float(r['Predicted_Burn_Rate']) for r in top5]
-        results2 = sorted(results, key=lambda r: r['Predicted_Burn_Rate'], reverse=True)
-
 
         return render_template('csv_results.html',
                                results=results,
