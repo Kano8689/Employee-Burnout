@@ -14,6 +14,14 @@ The project combines **Data Preprocessing**, **Feature Engineering**, **Machine 
 
 ---
 
+## 📄 Documentation
+
+A detailed project report covering the problem statement, dataset, machine learning methodology, implementation, results, and conclusions is available below.
+
+📘 **Project Report:** [Employee_Burnout_Project_Report.pdf](./Employee_Burnout_Project_Report.pdf)
+
+---
+
 ## 🚀 Project Highlights
 
 * Machine Learning-Based Burnout Score Prediction (0 – 1)
